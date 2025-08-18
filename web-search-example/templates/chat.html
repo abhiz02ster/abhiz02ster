@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gemini 3B Web Chat</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
+        #chatbox {
+            width: 80%;
+            max-width: 800px;
+            margin: auto;
+            margin-top: 30px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        #messages {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 8px;
+            background: #fafafa;
+            margin-bottom: 10px;
+        }
+        .msg { margin: 5px 0; padding: 8px; border-radius: 5px; max-width: 80%; }
+        .user { background: #d1e7dd; align-self: flex-end; }
+        .bot { background: #e2e3e5; }
+        #inputArea { display: flex; }
+        #messageInput { flex: 1; padding: 10px; font-size: 1em; }
+        #sendBtn { padding: 10px 20px; font-size: 1em; background: #0b5ed7; color: white; border: none; cursor: pointer; }
+        #sendBtn:hover { background: #0a53be; }
+    </style>
+</head>
+<body>
+    <div id="chatbox">
+        <h2>💬 Gemini 3B Chat</h2>
+        <div id="messages"></div>
+        <div id="inputArea">
+            <input type="text" id="messageInput" placeholder="Type your message..." />
+            <button id="sendBtn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const messagesDiv = document.getElementById("messages");
+        const input = document.getElementById("messageInput");
+        const sendBtn = document.getElementById("sendBtn");
+
+        function appendMessage(text, sender) {
+            const msgDiv = document.createElement("div");
+            msgDiv.classList.add("msg", sender);
+            msgDiv.textContent = text;
+            messagesDiv.appendChild(msgDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const text = input.value.trim();
+            if (!text) return;
+            appendMessage(text, "user");
+            input.value = "";
+            
+            const res = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: text })
+            });
+            const data = await res.json();
+            appendMessage(data.reply, "bot");
+        }
+
+        sendBtn.addEventListener("click", sendMessage);
+        input.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") sendMessage();
+        });
+    </script>
+</body>
+</html>
+
